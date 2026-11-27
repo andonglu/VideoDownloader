@@ -153,3 +153,37 @@ export interface HlsMediaPlaylist {
 export type HlsPlaylist =
   | HlsMasterPlaylist
   | HlsMediaPlaylist;
+
+/**
+ * M3U8 网络获取结果
+ */
+export interface HlsFetchResult {
+  ok: boolean;
+
+  /** 页面最初发现的 URL */
+  url: string;
+
+  /** HTTP 重定向后的实际 URL */
+  finalUrl?: string;
+
+  /** HTTP 状态码 */
+  httpStatus?: number;
+
+  /** A 阶段解析器的结果 */
+  playlist?: HlsPlaylist;
+
+  /** 请求或解析失败原因 */
+  error?: string;
+
+  /** 获取时间 */
+  fetchedAt: number;
+}
+
+/**
+ * Background 推送给 Popup 的消息
+ */
+export interface TabHlsUpdatedMessage {
+  type: "TAB_HLS_UPDATED";
+  tabId: number;
+  result: HlsFetchResult;
+}

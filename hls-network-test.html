@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>HLS 网络检测测试</title>
+</head>
+<body>
+  <h2>Video Downloader HLS 测试</h2>
+
+  <button onclick="loadPlaylist('master.m3u8')">
+    加载 Master Playlist
+  </button>
+
+  <button onclick="loadPlaylist('media.m3u8')">
+    加载 Media Playlist
+  </button>
+
+  <button onclick="loadPlaylist('missing.m3u8')">
+    加载 404 Playlist
+  </button>
+
+  <button onclick="loadPlaylist('master.m3u8'); fetch('http://localhost:8081/start.m3u8').catch(() => {})">
+    加载重定向 Playlist
+  </button>
+
+  <pre id="result"></pre>
+
+  <script>
+    async function loadPlaylist(name) {
+      const response = await fetch(
+        `./hls-fixtures/${name}`
+      );
+
+      const text = await response.text();
+
+      document.getElementById("result").textContent =
+        `HTTP ${response.status}\n\n${text}`;
+    }
+  </script>
+</body>
+</html>

@@ -4,6 +4,7 @@ import {
 } from "./services/detector";
 
 import type {
+  DetectedVideo,
   VideoQueryResponse,
 } from "./types/video";
 
@@ -27,6 +28,29 @@ function createReport(): VideoQueryResponse {
   };
 }
 
+/**
+ * 把发现的 HLS URL 上报给 Background。
+ *
+ * 网络请求和 M3U8 解析统一交给 Background。
+ */
+function reportHlsCandidates(
+  videos: DetectedVideo[]
+) {
+  for (const video of videos) {
+    if (video.kind !== "hls") {
+      continue;
+    }
+
+    void chrome.runtime.sendMessage({
+      type: "HLS_DETECTED",
+      url: video.url,
+    }).catch(() => {
+      // Background 暂时不可用时忽略，
+      // 下次强制扫描时会重新上报。
+    });
+  }
+}
+
 function sendReport(force = false): VideoQueryResponse {
   const response = createReport();
 
@@ -48,6 +72,9 @@ function sendReport(force = false): VideoQueryResponse {
   }
 
   lastSignature = signature;
+
+  // HLS 资源单独交给 Background 获取和解析
+  reportHlsCandidates(response.videos);
 
   void chrome.runtime.sendMessage({
     type: "VIDEOS_UPDATED",
